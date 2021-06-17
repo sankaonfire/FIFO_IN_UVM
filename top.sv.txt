@@ -1,0 +1,27 @@
+`include "uvm_macros.svh"
+`include "my_test_pkg.svh"
+`include "design.sv"
+
+module top;
+
+  import uvm_pkg::*;
+  import my_test_pkg::*;
+  
+  interf dut_if(); 
+  sync_fifo dut(.dif(dut_if)); 
+  
+  initial begin
+       dut_if.clk =0;
+       forever #5 dut_if.clk = ~dut_if.clk;   
+  end  
+  
+  initial begin
+    uvm_config_db#(virtual interf)::set(null,"*","vintf",dut_if);  
+    run_test("fifo_test"); 
+  end
+  
+  initial begin
+    $dumpvars;  
+  end
+  
+endmodule

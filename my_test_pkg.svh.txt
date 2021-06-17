@@ -1,0 +1,42 @@
+package my_test_pkg;
+
+ import uvm_pkg::*;
+
+ `include "fifo_transaction.svh"
+ `include "fifo_sequence.svh"
+ `include "fifo_monitor.svh"
+ `include "fifo_driver.svh"
+ `include "fifo_agent.svh"
+ `include "fifo_scoreboard.svh"
+ `include "fifo_bus_monitor.svh"
+ `include "fifo_env.svh"
+
+
+ class fifo_test extends uvm_test;
+  
+  `uvm_component_utils(fifo_test)
+  
+  fifo_env env; //Create environment
+    
+  function new(string name, uvm_component parent);
+    super.new(name,parent);
+  endfunction
+  
+  function void build_phase(uvm_phase phase);
+    super.build_phase(phase); 
+    env = fifo_env::type_id::create("env",this); 
+  endfunction
+  
+  task run_phase(uvm_phase phase);
+    uvm_config_db#(uvm_object_wrapper)::set(this,"env.agent.sequncer.main_phase","default_sequence",	fifo_sequence::type_id::get());
+    phase.raise_objection(this); 
+    begin
+      `uvm_info("",$sformatf("start of test"),UVM_LOW)
+    end
+    phase.drop_objection(this);
+    `uvm_info("",$sformatf("end of test"),UVM_LOW)
+  endtask
+  
+ endclass:fifo_test
+  
+endpackage:my_test_pkg

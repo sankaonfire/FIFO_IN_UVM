@@ -1,0 +1,43 @@
+class fifo_driver extends uvm_driver#(fifo_transaction);
+  
+  `uvm_component_utils(fifo_driver)
+    
+  virtual interf vintf;
+  
+  function new(string name, uvm_component parent);
+    super.new(name, parent);
+  endfunction
+  
+   function void build_phase(uvm_phase phase);
+    //super.build_phase(phase);
+    if(!uvm_config_db#(virtual interf)::get(this,"","vintf",vintf)) begin
+      `uvm_error("","uvm_config_db::get failed")
+    end
+  endfunction
+  
+  virtual task run_phase(uvm_phase phase);
+    
+       vintf.reset = 1;
+       @(posedge vintf.clk);
+       #1;
+       vintf.reset = 0;
+    
+       forever begin
+         seq_item_port.get_next_item(req);
+         
+         vintf.din = req.din;
+         vintf.wr_en = req.wr_en;
+         vintf.rd_en = req.rd_en;
+         @(posedge vintf.clk);
+         //`uvm_info("", $sformatf("Driver:Received din=%d",vintf.din), UVM_MEDIUM)
+         
+         seq_item_port.item_done();
+       end
+     
+  endtask
+  
+endclass:fifo_driver
+       
+           
+       
+       

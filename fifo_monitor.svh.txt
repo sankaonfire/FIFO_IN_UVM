@@ -1,0 +1,40 @@
+class fifo_monitor extends uvm_monitor;
+  
+  `uvm_component_utils(fifo_monitor)
+  
+  uvm_analysis_port#(fifo_transaction) item_collected_port; 
+  
+  virtual interf vintf;
+  fifo_transaction fifo_trans;
+  
+  function new(string name, uvm_component parent);
+    super.new(name,parent);
+    fifo_trans = new();
+    item_collected_port = new("item_collected_port",this);
+  endfunction
+  
+ function void build_phase(uvm_phase phase);
+    //super.build_phase(phase);
+    if(!uvm_config_db#(virtual interf)::get(this,"","vintf",vintf)) begin
+      `uvm_error("","uvm_get_config interface failed\n");
+    end
+  endfunction
+   
+  virtual task run_phase(uvm_phase phase);
+     //super.run_phase(phase);
+     
+       forever begin
+         @(posedge vintf.clk);
+         fifo_trans.din = vintf.din;
+         fifo_trans.wr_en = vintf.wr_en;
+         item_collected_port.write(fifo_trans);
+         `uvm_info("",$sformatf("Monitor: Din is %x\n",vintf.din), UVM_LOW)
+     end
+     
+  endtask
+  
+endclass:fifo_monitor
+       
+       
+       
+    

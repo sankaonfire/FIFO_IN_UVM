@@ -1,0 +1,46 @@
+class fifo_sequence extends uvm_sequence#(fifo_transaction);  
+
+  `uvm_object_utils (fifo_sequence)
+  //`uvm_declare_p_sequencer (fifo_sequencer)
+  
+  int unsigned n_times = 4;
+  
+  
+  function new (string name = "");
+    super.new(name);
+  endfunction
+
+  virtual task pre_body();
+    `uvm_info("BASE_SEQ",$sformatf("____________Inside pre_body()"),UVM_MEDIUM)
+    if(starting_phase != null)
+      starting_phase.raise_objection(this);
+  endtask
+  
+  virtual task body();
+    `uvm_info("BASE_SEQ",$sformatf("____________Stating body of %s", this.get_name()),UVM_MEDIUM)
+    
+    
+    repeat(n_times) begin
+      req = fifo_transaction::type_id::create("req");
+      start_item(req);
+      //assert (req.randomize());
+      if(!req.randomize())begin
+      `uvm_info("",$sformatf("Random error from seq"), UVM_LOW)
+      end
+      finish_item(req);
+      //`uvm_do_with(req,{req.wr_en ==1;req.rd_en ==0;})
+    end
+    
+    `uvm_info("BASE_SEQ",$sformatf("_____________Finishing body of %s", this.get_name()),UVM_MEDIUM)
+  endtask
+  
+  virtual task post_body();
+    `uvm_info("BASE_SEQ",$sformatf("_____________Inside post_body()"),UVM_MEDIUM)
+    if(starting_phase != null)
+      starting_phase.drop_objection(this);
+  endtask
+
+endclass
+
+      
+      

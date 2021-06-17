@@ -1,0 +1,57 @@
+
+interface interf;
+  
+  logic clk;
+  logic reset;
+  logic [7:0] din;
+  logic [7:0] dout;
+  logic wr_en;
+  logic rd_en;
+  logic full;
+  logic empty;
+  
+endinterface
+
+module sync_fifo(interf dif);
+  
+  reg[6:0]rd_ptr;
+  reg[6:0]wr_ptr;
+  reg[7:0]mem[127:0];
+  reg[6:0]depth_cnt;
+
+    always @(posedge dif.clk) begin
+      if(dif.reset) begin
+        wr_ptr <= 'h0;
+        rd_ptr <= 'h0;
+      end 
+      else begin
+        if(dif.wr_en)
+          wr_ptr <= wr_ptr+1;
+        if(dif.rd_en)
+          rd_ptr <= rd_ptr+1;
+      end
+    end
+  
+  assign dif.empty= (depth_cnt=='h0);
+  assign dif.full = (depth_cnt==127);
+  assign dif.dout = dif.rd_en ? mem[rd_ptr]:'h0;
+
+    always @(posedge dif.clk) begin
+     if (dif.wr_en)
+        mem[wr_ptr] <= dif.din;
+    end 
+
+    always @(posedge dif.clk) begin
+      if (dif.reset)
+        depth_cnt <= 'h0;
+      else begin
+        case({dif.rd_en,dif.wr_en})
+          2'b10:depth_cnt<=depth_cnt-1;
+          2'b01:depth_cnt<=depth_cnt+1;
+        endcase
+        $display("depth_cnt is %0d\n",depth_cnt);
+        $display("depth_full is %0b\n",dif.full);
+      end
+    end 
+
+endmodule

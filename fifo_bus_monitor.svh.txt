@@ -1,0 +1,35 @@
+class fifo_bus_monitor extends uvm_monitor;
+  
+  `uvm_component_utils(fifo_bus_monitor)
+  
+  uvm_analysis_port#(fifo_transaction) ap;
+  
+  virtual interf vintf;
+  fifo_transaction fifo_trans;
+  
+  function new(string name, uvm_component parent);
+    super.new(name,parent);
+    ap=new("ap",this);
+    fifo_trans=new();
+  endfunction
+  
+  function void build_phase(uvm_phase phase);
+    //super.build_phase(phase);
+    if(!uvm_config_db#(virtual interf)::get(this,"*","vintf", vintf)) begin
+      `uvm_error("","BUS_MONITOR interface failed")
+    end
+  endfunction
+  
+  virtual task run_phase(uvm_phase phase);
+    //super.run_phase(phase);
+
+    forever begin
+      @(posedge vintf.clk);
+      fifo_trans.dout = vintf.dout;
+      `uvm_info("",$sformatf("BusMonitor: Dout is %x\n", fifo_trans.dout), UVM_MEDIUM)
+      ap.write(fifo_trans);
+    end
+    
+  endtask
+  
+endclass:fifo_bus_monitor

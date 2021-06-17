@@ -1,0 +1,18 @@
+class fifo_transaction extends uvm_sequence_item;
+  
+  `uvm_object_utils(fifo_transaction)
+  
+  rand bit [7:0] din;
+  rand bit wr_en;
+  rand bit rd_en;
+  rand bit [7:0] dout;
+  bit full;
+  bit empty;
+  
+  constraint c3 {din >'d0; din <'d256;}
+  
+  function new(string name = "");
+    super.new(name);
+  endfunction
+  
+endclass:fifo_transaction
